@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "Led_Nuh7A3Q.h"
+#include <stdlib.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -95,17 +97,36 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
-
+	uint8_t mode;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  srand(HAL_GetTick());
+		mode=rand()%3+1;
 		
+	
+    
     /* USER CODE END WHILE */
-		HAL_GPIO_TogglePin(LD1_GPIO_Port,LD1_Pin);
-		HAL_Delay(500);
+//		HAL_GPIO_TogglePin(LD3_GPIO_Port,LD3_Pin);
+//		HAL_Delay(500);
+		switch(mode)
+		{
+			case 1:
+				Random_LED_Toggle(LD1_GPIO_Port,LD1_Pin);
+			break;
+			
+			case 2:
+				Random_LED_Toggle(LD2_GPIO_Port,LD2_Pin);
+			break;
+			
+			case 3:
+				Random_LED_Toggle(LD3_GPIO_Port,LD3_Pin);
+			break;
+		}
+		
 		
     /* USER CODE BEGIN 3 */
   }

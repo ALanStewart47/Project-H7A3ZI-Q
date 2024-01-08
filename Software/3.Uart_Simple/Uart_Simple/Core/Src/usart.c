@@ -21,6 +21,14 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+uint8_t		USART_RX_BUF[USART_REC_LEN];			//用户要使用的接收数组
+/*-------------------------
+-BIT15,接受完成标志
+-BIT14,接受到0x0d
+-BIT13-0,接受到的字节的数量
+-------------------------*/
+uint16_t	USART_RX_STA	= 0;
+uint8_t		hal_Rx_Buffers[HAL_USART_REC_LEN];			//HAL库接受函数要用的buff
 
 /* USER CODE END 0 */
 
@@ -66,7 +74,7 @@ void MX_USART3_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART3_Init 2 */
-
+	HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers,HAL_USART_REC_LEN);		//中断接收函数
   /* USER CODE END USART3_Init 2 */
 
 }
@@ -141,5 +149,37 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==USART3)//如果是串口1
+	{
+		if((USART_RX_STA&0x8000)==0)//接收未完成
+		{
+			if(USART_RX_STA&0x4000)//接收到了0x0d
+			{
+				if(hal_Rx_Buffers[0]!=0x0a)USART_RX_STA=0;//接收错误,重新开始
+				else USART_RX_STA|=0x8000;	//接收完成了 
+			}
+			else //还没收到0X0D
+			{	
+				if(hal_Rx_Buffers[0]==0x0d)USART_RX_STA|=0x4000;
+				else
+				{
+					USART_RX_BUF[USART_RX_STA&0X3FFF]=hal_Rx_Buffers[0] ;
+					USART_RX_STA++;
+					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;//接收数据错误,重新开始接收	  
+				}		 
+			}
+		}
 
+	}
+}
+
+//重定义fputc函数 
+int fputc(int ch, FILE *f)
+{ 	
+	while((USART3->ISR&0X40)==0);//循环发送,直到发送完毕   
+	USART3->TDR=(uint8_t)ch;     
+	return ch;
+}
 /* USER CODE END 1 */

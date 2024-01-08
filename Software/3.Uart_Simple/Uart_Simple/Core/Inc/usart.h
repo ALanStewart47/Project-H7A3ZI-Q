@@ -29,18 +29,24 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN Private defines */
+#define	USART_REC_LEN		200
+#define	HAL_USART_REC_LEN	1
 
+extern uint8_t		USART_RX_BUF[USART_REC_LEN];			//用户要使用的接收数组
+extern uint16_t		USART_RX_STA;
+extern uint8_t		hal_Rx_Buffers[HAL_USART_REC_LEN];	//HAL库接受函数要用的buff
 /* USER CODE END Private defines */
 
 void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
 
 /* USER CODE END Prototypes */
 

@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
-
+#include "usart.h"
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -204,11 +204,24 @@ void SysTick_Handler(void)
 void USART3_IRQHandler(void)
 {
   /* USER CODE BEGIN USART3_IRQn 0 */
-
+	uint32_t timeout=0;
+  uint32_t maxDelay=0x1FFFF;
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
-
+	timeout=0;
+    while (HAL_UART_GetState(&huart3)!=HAL_UART_STATE_READY)//等待就绪
+	{
+        timeout++;////超时处理
+        if(timeout>maxDelay) break;		
+	}
+     
+	timeout=0;
+	while(HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers, HAL_USART_REC_LEN)!=HAL_OK)//一次处理完成之后，重新开启中断并设置RxXferCount为1
+	{
+        timeout++; //超时处理
+        if(timeout>maxDelay) break;	
+	}
   /* USER CODE END USART3_IRQn 1 */
 }
 
