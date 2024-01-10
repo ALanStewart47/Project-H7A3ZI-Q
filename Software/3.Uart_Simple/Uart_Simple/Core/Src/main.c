@@ -109,13 +109,14 @@ int main(void)
 			USART_RX_STA=0;
 		}else
 		{
-			times++;/*
+			times++;
 			if(times%5000==0)
 			{
 				printf("\r\nALIENTEK STM32H7开发板 串口实验\r\n");
 				printf("正点原子@ALIENTEK\r\n\r\n\r\n");
-			}*/
-			//if(times%200==0)printf("请输入数据,以回车键结束\r\n");     
+			}
+			if(times%200==0)printf("请输入数据,以回车键结束\r\n"); 
+			HAL_Delay(50);	//delay 50ms
 		}
     /* USER CODE BEGIN 3 */
   }
