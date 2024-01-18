@@ -13,23 +13,21 @@
 #ifndef _BSP_USART_FIFO_H_
 #define _BSP_USART_FIFO_H_
 
-//#include "stm32h7a3xxq.h"
-#include "string.h"
-#include "stm32h7xx_hal_uart.h"
 
 #include "stm32h7xx.h"
+#include "stdio.h"
 
 /*
-	安富莱STM32-V7 串口分配：
+	H7A3ZI-Q 串口分配：
 	【串口1】 RS232 芯片第1路。
-		PA9/USART1_TX	  --- 打印调试口
+		PA9/USART1_TX	  
 		P10/USART1_RX
 
 	【串口2】 PA2 管脚用于以太网； RX管脚用于接收GPS信号
 		PA2/USART2_TX/ETH_MDIO (用于以太网，不做串口发送用)
 		PA3/USART2_RX	;接GPS模块输出
 
-	【串口3】 RS485 通信 - TTL 跳线 和 排针
+	【串口3】  ST-LINK-V3		--- 打印调试口
 		PB10/USART3_TX
 		PB11/USART3_RX
 
@@ -46,9 +44,9 @@
 */
 
 
-#define	UART1_FIFO_EN	1
+#define	UART1_FIFO_EN	0
 #define	UART2_FIFO_EN	0
-#define	UART3_FIFO_EN	0
+#define	UART3_FIFO_EN	1
 #define	UART4_FIFO_EN	0
 #define	UART5_FIFO_EN	0
 #define	UART6_FIFO_EN	0
@@ -90,7 +88,7 @@ typedef enum
 #endif
 
 #if UART3_FIFO_EN == 1
-	#define UART3_BAUD			9600
+	#define UART3_BAUD			115200
 	#define UART3_TX_BUF_SIZE	1*1024
 	#define UART3_RX_BUF_SIZE	1*1024
 #endif

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "bsp_uart_fifo.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -89,10 +90,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();
+  //MX_USART3_UART_Init();
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
 
+	bsp_InitUart();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -100,7 +102,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+		printf("* HAL¿â°æ±¾  : V1.3.0 (STM32H7xx HAL Driver)\r\n");
+		
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

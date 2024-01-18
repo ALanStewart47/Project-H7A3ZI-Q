@@ -55,17 +55,17 @@
 #define USART2_RX_PIN                    GPIO_PIN_3
 #define USART2_RX_AF                     GPIO_AF7_USART2
 
-/* 串口3的GPIO --- PB10 PB11  RS485 */
+/* 串口3的GPIO --- PD8 PD9  ST-LINK */
 #define USART3_CLK_ENABLE()              __HAL_RCC_USART3_CLK_ENABLE()
 
 #define USART3_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define USART3_TX_GPIO_PORT              GPIOB
-#define USART3_TX_PIN                    GPIO_PIN_10
+#define USART3_TX_GPIO_PORT              GPIOD
+#define USART3_TX_PIN                    GPIO_PIN_9
 #define USART3_TX_AF                     GPIO_AF7_USART3
 
 #define USART3_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define USART3_RX_GPIO_PORT              GPIOB
-#define USART3_RX_PIN                    GPIO_PIN_11
+#define USART3_RX_GPIO_PORT              GPIOD
+#define USART3_RX_PIN                    GPIO_PIN_8
 #define USART3_RX_AF                     GPIO_AF7_USART3
 
 /* 串口4的GPIO --- PC10 PC11  被SD卡占用 */
@@ -837,10 +837,16 @@ void bsp_SetUartParam(USART_TypeDef *Instance,  uint32_t BaudRate, uint32_t Pari
 	UartHandle.Init.Mode       = Mode;
 	UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
 	UartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-	UartHandle.Init.Prescaler = UART_PRESCALER_DIV1;
-	UartHandle.Init.FIFOMode = UART_FIFOMODE_DISABLE;
-	UartHandle.Init.TXFIFOThreshold = UART_TXFIFO_THRESHOLD_1_8;
-	UartHandle.Init.RXFIFOThreshold = UART_RXFIFO_THRESHOLD_1_8;
+	UartHandle.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+	UartHandle.FifoMode = UART_FIFOMODE_DISABLE;
+	if (HAL_UARTEx_SetTxFifoThreshold(&UartHandle, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    //Error_Handler(__FILE__, __LINE__);
+  }
+	if (HAL_UARTEx_SetRxFifoThreshold(&UartHandle, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    //Error_Handler();
+  }
 	UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     
 	if (HAL_UART_Init(&UartHandle) != HAL_OK)
@@ -1272,7 +1278,7 @@ static void UartIRQ(UART_T *_pUart)
 	uint32_t cr3its     = READ_REG(_pUart->uart->CR3);
 	
 	/* 处理接收中断  */
-	if ((isrflags & USART_ISR_RXNE) != RESET)
+	if ((isrflags & USART_ISR_RXNE_RXFNE) != RESET)
 	{
 		/* 从串口接收数据寄存器读取数据存放到接收FIFO */
 		uint8_t ch;
@@ -1300,7 +1306,7 @@ static void UartIRQ(UART_T *_pUart)
 	}
 
 	/* 处理发送缓冲区空中断 */
-	if ( ((isrflags & USART_ISR_TXE) != RESET) && (cr1its & USART_CR1_TXEIE) != RESET)
+	if ( ((isrflags & USART_ISR_TXE_TXFNF) != RESET) && (cr1its & USART_CR1_TXEIE) != RESET)
 	{
 		//if (_pUart->usTxRead == _pUart->usTxWrite)
 		if (_pUart->usTxCount == 0)
@@ -1468,10 +1474,10 @@ int fputc(int ch, FILE *f)
 	return ch;
 #else	/* 采用阻塞方式发送每个字符,等待数据发送完毕 */
 	/* 写一个字节到USART1 */
-	USART1->TDR = ch;
+	USART3->TDR = ch;
 	
 	/* 等待发送结束 */
-	while((USART1->ISR & USART_ISR_TC) == 0)
+	while((USART3->ISR & USART_ISR_TC) == 0)
 	{}
 	
 	return ch;
