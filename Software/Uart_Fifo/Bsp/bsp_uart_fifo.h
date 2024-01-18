@@ -19,28 +19,28 @@
 
 /*
 	H7A3ZI-Q 串口分配：
-	【串口1】 RS232 芯片第1路。
+	【串口1】 未配置
 		PA9/USART1_TX	  
 		P10/USART1_RX
 
-	【串口2】 PA2 管脚用于以太网； RX管脚用于接收GPS信号
-		PA2/USART2_TX/ETH_MDIO (用于以太网，不做串口发送用)
-		PA3/USART2_RX	;接GPS模块输出
+	【串口2】 未配置
+		PA2/USART2_TX
+		PA3/USART2_RX	;
 
 	【串口3】  ST-LINK-V3		--- 打印调试口
 		PB10/USART3_TX
 		PB11/USART3_RX
 
-	【串口4】 --- 不做串口用。 SD卡占用 
-	【串口5】 --- 不做串口用。 SD卡占用
+	【串口4】 --- 未配置 
+	【串口5】 --- 未配置
 
-	【串口6】--- GPRS模块 ，WIFI模块(ESP8266) 
+	【串口6】--- 未配置
 		PC6/USART6_TX
 		PC7/USART6_RX
 		
-	【串口7】 --- 不做串口用。 SPI3占用
+	【串口7】 --- 未配置
 	
-	【串口8】 --- 不做串口用。 LTDC显示接口用
+	【串口8】 --- 未配置
 */
 
 

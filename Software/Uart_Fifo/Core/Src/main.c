@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 #include "bsp_uart_fifo.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -53,6 +54,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_HS_USB_Init(void);
+static void PrintfLogo(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -69,7 +71,12 @@ static void MX_USB_OTG_HS_USB_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t read;
+	
+	const char buf1[] = "接收到串口命令1\r\n";
+	const char buf2[] = "接收到串口命令2\r\n";
+	const char buf3[] = "接收到串口命令3\r\n";
+	const char buf4[] = "接收到串口命令4\r\n";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -95,6 +102,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 	bsp_InitUart();
+	PrintfLogo();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -102,7 +110,30 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		printf("* HAL库版本  : V1.3.0 (STM32H7xx HAL Driver)\r\n");
+		if (comGetChar(COM3, &read))
+		{
+			switch (read)
+			{
+				case '1':
+					comSendBuf(COM3, (uint8_t *)buf1, strlen(buf1));
+					break;
+
+				case '2':
+					comSendBuf(COM3, (uint8_t *)buf2, strlen(buf2));
+					break;
+
+				case '3':
+					comSendBuf(COM3, (uint8_t *)buf3, strlen(buf3));
+					break;
+
+				case '4':
+					comSendBuf(COM3, (uint8_t *)buf4, strlen(buf4));
+					break;	
+				
+				default:
+					break;
+			}
+		}
 		
     /* USER CODE BEGIN 3 */
   }
@@ -329,7 +360,39 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void PrintfLogo(void)
+{
+	printf("*************************************************************\n\r");
+	
+	/* 检测CPU ID */
+	{
+		uint32_t CPU_Sn0, CPU_Sn1, CPU_Sn2;
+		
+		CPU_Sn0 = *(__IO uint32_t*)(0x1FF1E800);
+		CPU_Sn1 = *(__IO uint32_t*)(0x1FF1E800 + 4);
+		CPU_Sn2 = *(__IO uint32_t*)(0x1FF1E800 + 8);
 
+		printf("\r\nCPU : STM32H743XIH6, BGA240, 主频: %dMHz\r\n", SystemCoreClock / 1000000);
+		printf("UID = %08X %08X %08X\n\r", CPU_Sn2, CPU_Sn1, CPU_Sn0);
+	}
+
+	printf("\n\r");
+	printf("*************************************************************\n\r");
+//	printf("* 例程名称   : %s\r\n", EXAMPLE_NAME);	/* 打印例程名称 */
+	//printf("* 例程版本   : %s\r\n", DEMO_VER);		/* 打印例程版本 */
+	//printf("* 发布日期   : %s\r\n", EXAMPLE_DATE);	/* 打印例程日期 */
+
+	/* 打印ST的HAL库版本 */
+	printf("* HAL库版本  : V1.3.0 (STM32H7xx HAL Driver)\r\n");
+	printf("* \r\n");	/* 打印一行空格 */
+	printf("* QQ    : 1295744630 \r\n");
+	printf("* 旺旺  : armfly\r\n");
+	printf("* Email : armfly@qq.com \r\n");
+	printf("* 微信公众号: armfly_com \r\n");
+	printf("* 淘宝店: armfly.taobao.com\r\n");
+	printf("* Copyright www.armfly.com 安富莱电子\r\n");
+	printf("*************************************************************\n\r");
+}
 /* USER CODE END 4 */
 
 /**

@@ -17,6 +17,7 @@
 *		V1.6	2018-09-07 armfly  移植到STM32H7平台
 *		V1.7	2018-10-01 armfly  增加 Sending 标志，表示正在发送中
 *		V1.8	2018-11-26 armfly  增加UART8，第8个串口
+
 *
 *	Copyright (C), 2015-2030, 安富莱电子 www.armfly.com
 *
