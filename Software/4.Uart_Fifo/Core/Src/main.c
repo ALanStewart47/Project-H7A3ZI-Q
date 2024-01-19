@@ -21,6 +21,10 @@
 #include "string.h"
 #include "bsp_uart_fifo.h"
 
+#define EXAMPLE_NAME	"uart_fifo"
+#define EXAMPLE_DATE	"2024-01-19"
+#define DEMO_VER		"1.0"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -101,7 +105,7 @@ int main(void)
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
 
-	bsp_InitUart();
+	bsp_InitUart();		//
 	PrintfLogo();
   /* USER CODE END 2 */
 
@@ -366,30 +370,38 @@ static void PrintfLogo(void)
 	
 	/* 检测CPU ID */
 	{
-		uint32_t CPU_Sn0, CPU_Sn1, CPU_Sn2;
+		uint32_t CPU_Sn0, CPU_Sn1, CPU_Sn2;;
 		
-		CPU_Sn0 = *(__IO uint32_t*)(0x1FF1E800);
-		CPU_Sn1 = *(__IO uint32_t*)(0x1FF1E800 + 4);
-		CPU_Sn2 = *(__IO uint32_t*)(0x1FF1E800 + 8);
+		CPU_Sn0 = *(__IO uint32_t*)(0x08FFF800);
+		CPU_Sn1 = *(__IO uint32_t*)(0x08FFF800 + 4);
+		CPU_Sn2 = *(__IO uint32_t*)(0x08FFF800 + 8);
+		
 
-		printf("\r\nCPU : STM32H743XIH6, BGA240, 主频: %dMHz\r\n", SystemCoreClock / 1000000);
+		printf("\r\nCPU : STM32H7A3ZI-Q , 主频: %dMHz\r\n", SystemCoreClock / 1000000);
 		printf("UID = %08X %08X %08X\n\r", CPU_Sn2, CPU_Sn1, CPU_Sn0);
 	}
 
+	uint8_t		MAIN_HalVersion=0;
+	uint8_t	SUB1_HalVersion=0;
+	uint8_t	SUB2_HalVersion=0;
+	uint8_t	RC_HalVersion=0;
+	MAIN_HalVersion = (unsigned char) (HAL_GetHalVersion()>>24);
+	SUB1_HalVersion	=	(unsigned char) (HAL_GetHalVersion()>>16);
+	SUB2_HalVersion	=	(unsigned char) (HAL_GetHalVersion()>>8);
+	RC_HalVersion		=	(unsigned char)	(HAL_GetHalVersion());
+	
+	
+	
+	
 	printf("\n\r");
 	printf("*************************************************************\n\r");
-//	printf("* 例程名称   : %s\r\n", EXAMPLE_NAME);	/* 打印例程名称 */
-	//printf("* 例程版本   : %s\r\n", DEMO_VER);		/* 打印例程版本 */
-	//printf("* 发布日期   : %s\r\n", EXAMPLE_DATE);	/* 打印例程日期 */
+	printf("* 例程名称   : %s\r\n", EXAMPLE_NAME);	/* 打印例程名称 */
+	printf("* 例程版本   : %s\r\n", DEMO_VER);		/* 打印例程版本 */
+	printf("* 发布日期   : %s\r\n", EXAMPLE_DATE);	/* 打印例程日期 */
 
 	/* 打印ST的HAL库版本 */
-	printf("* HAL库版本  : V1.3.0 (STM32H7xx HAL Driver)\r\n");
+	printf("* HAL库版本  : %d.%d.%d.%d (STM32H7xx HAL Driver)\r\n", MAIN_HalVersion,SUB1_HalVersion,SUB2_HalVersion,RC_HalVersion);
 	printf("* \r\n");	/* 打印一行空格 */
-	printf("* QQ    : 1295744630 \r\n");
-	printf("* 旺旺  : armfly\r\n");
-	printf("* Email : armfly@qq.com \r\n");
-	printf("* 微信公众号: armfly_com \r\n");
-	printf("* 淘宝店: armfly.taobao.com\r\n");
 	printf("* Copyright www.armfly.com 安富莱电子\r\n");
 	printf("*************************************************************\n\r");
 }

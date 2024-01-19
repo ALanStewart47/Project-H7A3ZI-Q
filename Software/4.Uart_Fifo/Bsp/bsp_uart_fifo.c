@@ -3,29 +3,35 @@
 *
 *	模块名称 : 串口中断+FIFO驱动模块
 *	文件名称 : bsp_uart_fifo.c
-*	版    本 : V1.8
+*	版    本 : V1.
 *	说    明 : 采用串口中断+FIFO模式实现多个串口的同时访问
 *	修改记录 :
-*		版本号  日期       作者    说明
-*		V1.0    2013-02-01 armfly  正式发布
-*		V1.1    2013-06-09 armfly  FiFo结构增加TxCount成员变量，方便判断缓冲区满; 增加 清FiFo的函数
-*		V1.2	2014-09-29 armfly  增加RS485 MODBUS接口。接收到新字节后，直接执行回调函数。
-*		V1.3	2015-07-23 armfly  增加 UART_T 结构的读写指针几个成员变量必须增加 __IO 修饰,否则优化后
-*					会导致串口发送函数死机。
-*		V1.4	2015-08-04 armfly  解决UART4配置bug  GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART1);
-*		V1.5	2015-10-08 armfly  增加修改波特率的接口函数
-*		V1.6	2018-09-07 armfly  移植到STM32H7平台
-*		V1.7	2018-10-01 armfly  增加 Sending 标志，表示正在发送中
-*		V1.8	2018-11-26 armfly  增加UART8，第8个串口
+*		版本号  日期       作者    				说明
+*		V1.0    2013-02-01 armfly  				正式发布
+*		V1.1    2013-06-09 armfly  				FiFo结构增加TxCount成员变量，方便判断缓冲区满; 增加 清FiFo的函数
+*		V1.2	2014-09-29 armfly  					增加RS485 MODBUS接口。接收到新字节后，直接执行回调函数。
+*		V1.3	2015-07-23 armfly  					增加 UART_T 结构的读写指针几个成员变量必须增加 __IO 修饰,否则优化后
+*																				会导致串口发送函数死机。
+*		V1.4	2015-08-04 armfly  					解决UART4配置bug  GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART1);
+*		V1.5	2015-10-08 armfly  					增加修改波特率的接口函数
+*		V1.6	2018-09-07 armfly  					移植到STM32H7平台
+*		V1.7	2018-10-01 armfly  					增加 Sending 标志，表示正在发送中
+*		V1.8	2018-11-26 armfly  					增加UART8，第8个串口
+*		V1.9	2024-01-19 ALanStewart			移植到STM32H7A3
+*
 *
 *	Copyright (C), 2015-2030, 安富莱电子 www.armfly.com
 *
 *********************************************************************************************************
 */
 
-#include "bsp.h"
+#include "bsp_uart_fifo.h"
 
-/* 串口1的GPIO  PA9, PA10   RS323 DB9接口 */
+
+#define ENABLE_INT()	__set_PRIMASK(0)	/* 使能全局中断 */
+#define DISABLE_INT()	__set_PRIMASK(1)	/* 禁止全局中断 */
+
+/* 串口1的GPIO  PA9, PA10   */
 #define USART1_CLK_ENABLE()              __HAL_RCC_USART1_CLK_ENABLE()
 
 #define USART1_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
@@ -38,7 +44,7 @@
 #define USART1_RX_PIN                    GPIO_PIN_10
 #define USART1_RX_AF                     GPIO_AF7_USART1
 
-/* 串口2的GPIO --- PA2 PA3  GPS (只用RX。 TX被以太网占用） */
+/* 串口2的GPIO --- PA2 PA3  */
 #define USART2_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE()
 
 #define USART2_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
@@ -51,20 +57,20 @@
 #define USART2_RX_PIN                    GPIO_PIN_3
 #define USART2_RX_AF                     GPIO_AF7_USART2
 
-/* 串口3的GPIO --- PB10 PB11  RS485 */
+/* 串口3的GPIO --- PD8 PD9  ST-LINK */
 #define USART3_CLK_ENABLE()              __HAL_RCC_USART3_CLK_ENABLE()
 
 #define USART3_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define USART3_TX_GPIO_PORT              GPIOB
-#define USART3_TX_PIN                    GPIO_PIN_10
+#define USART3_TX_GPIO_PORT              GPIOD
+#define USART3_TX_PIN                    GPIO_PIN_9
 #define USART3_TX_AF                     GPIO_AF7_USART3
 
 #define USART3_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define USART3_RX_GPIO_PORT              GPIOB
-#define USART3_RX_PIN                    GPIO_PIN_11
+#define USART3_RX_GPIO_PORT              GPIOD
+#define USART3_RX_PIN                    GPIO_PIN_8
 #define USART3_RX_AF                     GPIO_AF7_USART3
 
-/* 串口4的GPIO --- PC10 PC11  被SD卡占用 */
+/* 串口4的GPIO  */
 #define UART4_CLK_ENABLE()              __HAL_RCC_UART4_CLK_ENABLE()
 
 #define UART4_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
@@ -77,7 +83,7 @@
 #define UART4_RX_PIN                    GPIO_PIN_11
 #define UART4_RX_AF                     GPIO_AF8_UART4
 
-/* 串口5的GPIO --- PC12/UART5_TX PD2/UART5_RX (被SD卡占用） */
+/* 串口5的GPIO --- PC12/UART5_TX PD2/UART5_RX  */
 #define UART5_CLK_ENABLE()              __HAL_RCC_UART5_CLK_ENABLE()
 
 #define UART5_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
@@ -90,7 +96,7 @@
 #define UART5_RX_PIN                    GPIO_PIN_2
 #define UART5_RX_AF                     GPIO_AF8_UART5
 
-/* 串口6的GPIO --- PG14 PC7  GPRS */
+/* 串口6的GPIO --- PG14 PC7   */
 #define USART6_CLK_ENABLE()              __HAL_RCC_USART6_CLK_ENABLE()
 
 #define USART6_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOG_CLK_ENABLE()
@@ -103,7 +109,7 @@
 #define USART6_RX_PIN                    GPIO_PIN_7
 #define USART6_RX_AF                     GPIO_AF7_USART6
 
-/* 串口7的GPIO --- PB4/UART7_TX, PB3/UART7_RX   (被SPI3 占用) */
+/* 串口7的GPIO --- PB4/UART7_TX, PB3/UART7_RX    */
 #define UART7_CLK_ENABLE()              __HAL_RCC_UART7_CLK_ENABLE()
 
 #define UART7_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
@@ -116,7 +122,7 @@
 #define UART7_RX_PIN                    GPIO_PIN_3
 #define UART7_RX_AF                     GPIO_AF11_UART7
 
-/* 串口8的GPIO --- PJ8/UART8_TX, PJ9/UART8_RX   (RGB硬件接口占用) */
+/* 串口8的GPIO --- PJ8/UART8_TX, PJ9/UART8_RX */
 #define UART8_CLK_ENABLE()              __HAL_RCC_UART8_CLK_ENABLE()
 
 #define UART8_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOJ_CLK_ENABLE()
@@ -186,6 +192,38 @@ static uint8_t UartGetChar(UART_T *_pUart, uint8_t *_pByte);
 static void UartIRQ(UART_T *_pUart);
 
 void RS485_InitTXE(void);
+
+
+
+
+
+/*
+*********************************************************************************************************
+*	函 数 名: Error_Handler
+*	功能说明: 初始化串口硬件，并对全局变量赋初值.
+*	形    参: 无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void Uart_Error_Handler(char *file, uint32_t line)
+{
+	 
+	//用户可以添加自己的代码报告源代码文件名和代码行号，比如将错误文件和行号打印到串口
+	printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+	
+	
+	/* 这是一个死循环，断言失败时程序会在此处死机，以便于用户查错 */
+	if (line == 0)
+	{
+		return;
+	}
+	
+	while(1)
+	{
+	}
+}
+
+
 
 /*
 *********************************************************************************************************
@@ -281,7 +319,7 @@ UART_T *ComToUart(COM_PORT_E _ucPort)
 	}	
 	else
 	{
-		Error_Handler(__FILE__, __LINE__);
+		Uart_Error_Handler(__FILE__, __LINE__);
 		return 0;
 	}
 }
@@ -776,18 +814,20 @@ static void UartVarInit(void)
 *	返 回 值: 无
 *********************************************************************************************************
 */
+
+
 void bsp_SetUartParam(USART_TypeDef *Instance,  uint32_t BaudRate, uint32_t Parity, uint32_t Mode)
 {
 	UART_HandleTypeDef UartHandle;	
 	
-	/*##-1- 配置串口硬件参数 ######################################*/
-	/* 异步串口模式 (UART Mode) */
-	/* 配置如下:
-	  - 字长    = 8 位
-	  - 停止位  = 1 个停止位
-	  - 校验    = 参数Parity
-	  - 波特率  = 参数BaudRate
-	  - 硬件流控制关闭 (RTS and CTS signals) */
+	//##-1- 配置串口硬件参数 ######################################
+	// 异步串口模式 (UART Mode) 
+	// 配置如下:
+//	  - 字长    = 8 位
+//	  - 停止位  = 1 个停止位
+//	  - 校验    = 参数Parity
+//	  - 波特率  = 参数BaudRate
+//	  - 硬件流控制关闭 (RTS and CTS signals) 
 
 	UartHandle.Instance        = Instance;
 
@@ -799,17 +839,24 @@ void bsp_SetUartParam(USART_TypeDef *Instance,  uint32_t BaudRate, uint32_t Pari
 	UartHandle.Init.Mode       = Mode;
 	UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
 	UartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-	UartHandle.Init.Prescaler = UART_PRESCALER_DIV1;
-	UartHandle.Init.FIFOMode = UART_FIFOMODE_DISABLE;
-	UartHandle.Init.TXFIFOThreshold = UART_TXFIFO_THRESHOLD_1_8;
-	UartHandle.Init.RXFIFOThreshold = UART_RXFIFO_THRESHOLD_1_8;
+	UartHandle.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+	UartHandle.FifoMode = UART_FIFOMODE_DISABLE;
+	if (HAL_UARTEx_SetTxFifoThreshold(&UartHandle, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Uart_Error_Handler(__FILE__, __LINE__);
+  }
+	if (HAL_UARTEx_SetRxFifoThreshold(&UartHandle, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Uart_Error_Handler(__FILE__, __LINE__);
+  }
 	UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     
 	if (HAL_UART_Init(&UartHandle) != HAL_OK)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		Uart_Error_Handler(__FILE__, __LINE__);
 	}
 }
+
 
 /*
 *********************************************************************************************************
@@ -1233,7 +1280,7 @@ static void UartIRQ(UART_T *_pUart)
 	uint32_t cr3its     = READ_REG(_pUart->uart->CR3);
 	
 	/* 处理接收中断  */
-	if ((isrflags & USART_ISR_RXNE) != RESET)
+	if ((isrflags & USART_ISR_RXNE_RXFNE) != RESET)
 	{
 		/* 从串口接收数据寄存器读取数据存放到接收FIFO */
 		uint8_t ch;
@@ -1261,7 +1308,7 @@ static void UartIRQ(UART_T *_pUart)
 	}
 
 	/* 处理发送缓冲区空中断 */
-	if ( ((isrflags & USART_ISR_TXE) != RESET) && (cr1its & USART_CR1_TXEIE) != RESET)
+	if ( ((isrflags & USART_ISR_TXE_TXFNF) != RESET) && (cr1its & USART_CR1_TXEIE) != RESET)
 	{
 		//if (_pUart->usTxRead == _pUart->usTxWrite)
 		if (_pUart->usTxCount == 0)
@@ -1429,10 +1476,10 @@ int fputc(int ch, FILE *f)
 	return ch;
 #else	/* 采用阻塞方式发送每个字符,等待数据发送完毕 */
 	/* 写一个字节到USART1 */
-	USART1->TDR = ch;
+	USART3->TDR = ch;
 	
 	/* 等待发送结束 */
-	while((USART1->ISR & USART_ISR_TC) == 0)
+	while((USART3->ISR & USART_ISR_TC) == 0)
 	{}
 	
 	return ch;
