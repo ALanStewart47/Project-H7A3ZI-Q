@@ -21,7 +21,9 @@
 *********************************************************************************************************
 */
 
-#include "bsp.h"
+//#include "bsp.h"
+#include "bsp_tim_pwm.h"
+
 
 
 /*
@@ -125,7 +127,7 @@ void bsp_RCC_TIM_Enable(TIM_TypeDef* TIMx)
 	else if (TIMx == TIM17) __HAL_RCC_TIM17_CLK_ENABLE();	
 	else
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}	
 }
 
@@ -162,7 +164,7 @@ void bsp_RCC_TIM_Disable(TIM_TypeDef* TIMx)
 	else if (TIMx == TIM17) __HAL_RCC_TIM17_CLK_DISABLE();
 	else
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 }
 
@@ -192,7 +194,7 @@ uint8_t bsp_GetAFofTIM(TIM_TypeDef* TIMx)
 	else if (TIMx == TIM17) ret = GPIO_AF1_TIM17;
 	else
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 	
 	return ret;
@@ -275,21 +277,21 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 
 	if (_ucChannel > 6)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 	
 	if (_ulDutyCycle == 0)
 	{		
 		//bsp_RCC_TIM_Disable(TIMx);		/* 关闭TIM时钟, 可能影响其他通道 */		
 		bsp_ConfigGpioOut(GPIOx, GPIO_Pin);	/* 配置GPIO为推挽输出 */			
-		GPIOx->BSRRH = GPIO_Pin;		/* PWM = 0 */		
+		GPIOx->BSRR = GPIO_Pin;		/* PWM = 0   BSRRH*/		
 		return;
 	}
 	else if (_ulDutyCycle == 10000)
 	{
 		//bsp_RCC_TIM_Disable(TIMx);		/* 关闭TIM时钟, 可能影响其他通道 */
 		bsp_ConfigGpioOut(GPIOx, GPIO_Pin);	/* 配置GPIO为推挽输出 */		
-		GPIOx->BSRRL = GPIO_Pin;		/* PWM = 1*/	
+		GPIOx->BSRR = GPIO_Pin;		/* PWM = 1   BSRRL*/	
 		return;
 	}
 	
@@ -298,19 +300,19 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 	bsp_ConfigTimGpio(GPIOx, GPIO_Pin, TIMx);	/* 使能GPIO和TIM时钟，并连接TIM通道到GPIO */
 	
     /*-----------------------------------------------------------------------
-		bsp.c 文件中 void SystemClock_Config(void) 函数对时钟的配置如下: 
+		void SystemClock_Config(void) 函数对时钟的配置如下: 
 
         System Clock source       = PLL (HSE)
-        SYSCLK(Hz)                = 400000000 (CPU Clock)
-        HCLK(Hz)                  = 200000000 (AXI and AHBs Clock)
+        SYSCLK(Hz)                = 280000000 (CPU Clock)
+        HCLK(Hz)                  = 280000000 (AXI and AHBs Clock)
         AHB Prescaler             = 2
-        D1 APB3 Prescaler         = 2 (APB3 Clock  100MHz)
-        D2 APB1 Prescaler         = 2 (APB1 Clock  100MHz)
-        D2 APB2 Prescaler         = 2 (APB2 Clock  100MHz)
-        D3 APB4 Prescaler         = 2 (APB4 Clock  100MHz)
+        D1 APB3 Prescaler         = 2 (APB3 Clock  140MHz)
+				D2 APB1 Prescaler         = 2 (APB1 Clock  140MHz)	
+        D2 APB2 Prescaler         = 2 (APB2 Clock  140MHz)	
+        D3 APB4 Prescaler         = 2 (APB4 Clock  140MHz)
 
-        因为APB1 prescaler != 1, 所以 APB1上的TIMxCLK = APB1 x 2 = 200MHz;
-        因为APB2 prescaler != 1, 所以 APB2上的TIMxCLK = APB2 x 2 = 200MHz;
+        因为APB1 prescaler != 1, 所以 APB1上的TIMxCLK = APB1 x 2 = 280MHz;
+        因为APB2 prescaler != 1, 所以 APB2上的TIMxCLK = APB2 x 2 = 280MHz;
         APB4上面的TIMxCLK没有分频，所以就是100MHz;
 
         APB1 定时器有 TIM2, TIM3 ,TIM4, TIM5, TIM6, TIM7, TIM12, TIM13, TIM14，LPTIM1
@@ -321,12 +323,12 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 	----------------------------------------------------------------------- */
 	if ((TIMx == TIM1) || (TIMx == TIM8) || (TIMx == TIM15) || (TIMx == TIM16) || (TIMx == TIM17))
 	{
-		/* APB2 定时器时钟 = 200M */
+		/* APB2 定时器时钟 = 140M */
 		uiTIMxCLK = SystemCoreClock / 2;
 	}
 	else	
 	{
-		/* APB1 定时器 = 200M */
+		/* APB1 定时器 = 140M */
 		uiTIMxCLK = SystemCoreClock / 2;
 	}
 
@@ -360,7 +362,7 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 	TimHandle.Init.AutoReloadPreload = 0;
 	if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 
 	/* 配置定时器PWM输出通道 */
@@ -375,13 +377,13 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 	sConfig.Pulse = pulse;
 	if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TimChannel[_ucChannel]) != HAL_OK)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 	
 	/* 启动PWM输出 */
 	if (HAL_TIM_PWM_Start(&TimHandle, TimChannel[_ucChannel]) != HAL_OK)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 }
 
@@ -477,7 +479,7 @@ void bsp_SetTIMforInt(TIM_TypeDef* TIMx, uint32_t _ulFreq, uint8_t _PreemptionPr
 	TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
 	{
-		Error_Handler(__FILE__, __LINE__);
+		//Error_Handler(__FILE__, __LINE__);
 	}
 
 	/* 使能定时器中断  */
@@ -504,7 +506,7 @@ void bsp_SetTIMforInt(TIM_TypeDef* TIMx, uint32_t _ulFreq, uint8_t _PreemptionPr
         else if (TIMx == TIM17) irq = TIM17_IRQn;
         else
         {
-            Error_Handler(__FILE__, __LINE__);
+            //Error_Handler(__FILE__, __LINE__);
         }	
         HAL_NVIC_SetPriority((IRQn_Type)irq, _PreemptionPriority, _SubPriority);
         HAL_NVIC_EnableIRQ((IRQn_Type)irq);		

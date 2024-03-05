@@ -92,11 +92,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM3_Init();
+  //MX_TIM3_Init();
+	//bsp_SetTIMforInt(htim3.Instance,2000000,2,0);
   MX_USART3_UART_Init();
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
-	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+	//HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+	bsp_SetTIMOutPWM(GPIOB,GPIO_PIN_0,TIM3,3,10000,5000);		//100MHz  50%
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -274,7 +276,7 @@ static void MX_USART3_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART3_Init 2 */
-
+	
   /* USER CODE END USART3_Init 2 */
 
 }
