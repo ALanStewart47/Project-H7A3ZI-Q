@@ -3,7 +3,7 @@
 *
 *	模块名称 : TIM基本定时中断和PWM驱动模块
 *	文件名称 : bsp_tim_pwm.c
-*	版    本 : V1.6
+*	版    本 : V1.7
 *	说    明 : 利用STM32H7内部TIM输出PWM信号， 并实现基本的定时中断
 *	修改记录 :
 *		版本号  日期        作者     说明
@@ -15,6 +15,8 @@
 *		V1.4	2015-07-30 armfly  增加反相引脚输出PWM函数 bsp_SetTIMOutPWM_N();
 *		V1.5	2016-02-01 armfly  去掉 TIM_OC1PreloadConfig(TIMx, TIM_OCPreload_Enable);
 *		V1.6	2016-02-27 armfly  解决TIM14无法中断的BUG, TIM8_TRG_COM_TIM14_IRQn
+*		V1.7	2024-03-07 ALanStewart		适配于STM32H7A3，解除对bsp.h的依赖，改为对hal库的依赖
+
 *
 *	Copyright (C), 2018-2030, 安富莱电子 www.armfly.com
 *
@@ -303,16 +305,16 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 		void SystemClock_Config(void) 函数对时钟的配置如下: 
 
         System Clock source       = PLL (HSE)
-        SYSCLK(Hz)                = 280000000 (CPU Clock)
-        HCLK(Hz)                  = 280000000 (AXI and AHBs Clock)
+        SYSCLK(Hz)                = 200000000 (CPU Clock)
+        HCLK(Hz)                  = 200000000 (AXI and AHBs Clock)
         AHB Prescaler             = 2
-        D1 APB3 Prescaler         = 2 (APB3 Clock  140MHz)
-				D2 APB1 Prescaler         = 2 (APB1 Clock  140MHz)	
-        D2 APB2 Prescaler         = 2 (APB2 Clock  140MHz)	
-        D3 APB4 Prescaler         = 2 (APB4 Clock  140MHz)
+        D1 APB3 Prescaler         = 2 (APB3 Clock  100MHz)
+				D2 APB1 Prescaler         = 2 (APB1 Clock  100MHz)	
+        D2 APB2 Prescaler         = 2 (APB2 Clock  100MHz)	
+        D3 APB4 Prescaler         = 2 (APB4 Clock  100MHz)
 
-        因为APB1 prescaler != 1, 所以 APB1上的TIMxCLK = APB1 x 2 = 280MHz;
-        因为APB2 prescaler != 1, 所以 APB2上的TIMxCLK = APB2 x 2 = 280MHz;
+        因为APB1 prescaler != 1, 所以 APB1上的TIMxCLK = APB1 x 2 = 200MHz;
+        因为APB2 prescaler != 1, 所以 APB2上的TIMxCLK = APB2 x 2 = 200MHz;
         APB4上面的TIMxCLK没有分频，所以就是100MHz;
 
         APB1 定时器有 TIM2, TIM3 ,TIM4, TIM5, TIM6, TIM7, TIM12, TIM13, TIM14，LPTIM1
@@ -323,28 +325,26 @@ void bsp_SetTIMOutPWM(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, TIM_TypeDef* TIMx,
 	----------------------------------------------------------------------- */
 	if ((TIMx == TIM1) || (TIMx == TIM8) || (TIMx == TIM15) || (TIMx == TIM16) || (TIMx == TIM17))
 	{
-		/* APB2 定时器时钟 = 140M */
 		uiTIMxCLK = SystemCoreClock / 2;
 	}
 	else	
 	{
-		/* APB1 定时器 = 140M */
 		uiTIMxCLK = SystemCoreClock / 2;
 	}
 
 	if (_ulFreq < 100)
 	{
-		usPrescaler = 10000 - 1;					/* 分频比 = 10000 */
+		usPrescaler = 20000 - 1;					/* 分频比 = 20000 */
 		usPeriod =  (uiTIMxCLK / 10000) / _ulFreq  - 1;		/* 自动重装的值 */
 	}
 	else if (_ulFreq < 3000)
 	{
-		usPrescaler = 100 - 1;					/* 分频比 = 100 */
+		usPrescaler = 200 - 1;					/* 分频比 = 200 */
 		usPeriod =  (uiTIMxCLK / 100) / _ulFreq  - 1;		/* 自动重装的值 */
 	}
 	else	/* 大于4K的频率，无需分频 */
 	{
-		usPrescaler = 0;					/* 分频比 = 1 */
+		usPrescaler = 2-1;					/* 分频比 = 2 */
 		usPeriod = uiTIMxCLK / _ulFreq - 1;	/* 自动重装的值 */
 	}
 	pulse = (_ulDutyCycle * usPeriod) / 10000;
@@ -453,17 +453,17 @@ void bsp_SetTIMforInt(TIM_TypeDef* TIMx, uint32_t _ulFreq, uint8_t _PreemptionPr
 
 	if (_ulFreq < 100)
 	{
-		usPrescaler = 10000 - 1;					/* 分频比 = 10000 */
+		usPrescaler = 20000 - 1;					/* 分频比 = 10000 */
 		usPeriod =  (uiTIMxCLK / 10000) / _ulFreq  - 1;		/* 自动重装的值 */
 	}
 	else if (_ulFreq < 3000)
 	{
-		usPrescaler = 100 - 1;					/* 分频比 = 100 */
+		usPrescaler = 200 - 1;					/* 分频比 = 100 */
 		usPeriod =  (uiTIMxCLK / 100) / _ulFreq  - 1;		/* 自动重装的值 */
 	}
 	else	/* 大于4K的频率，无需分频 */
 	{
-		usPrescaler = 0;					/* 分频比 = 1 */
+		usPrescaler = 2-1;					/* 分频比 = 1 */
 		usPeriod = uiTIMxCLK / _ulFreq - 1;	/* 自动重装的值 */
 	}
 
@@ -513,6 +513,18 @@ void bsp_SetTIMforInt(TIM_TypeDef* TIMx, uint32_t _ulFreq, uint8_t _PreemptionPr
 	}
 	
 	HAL_TIM_Base_Start(&TimHandle);
+}
+
+
+__WEAK void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
 }
 
 /***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/
