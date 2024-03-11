@@ -47,8 +47,7 @@ typedef struct
 
 /* GPIO和PIN定义 */
 static const X_GPIO_T s_gpio_list[HARD_KEY_NUM] = {
-	//{GPIOI, GPIO_PIN_8, 0},		/* K1 */
-	{GPIOC, GPIO_PIN_13, 1},	/* K */
+	{GPIOC, GPIO_PIN_13, 1},	/* K1 */
 
 };	
 
@@ -130,9 +129,10 @@ static uint8_t IsKeyDownFunc(uint8_t _id)
 		return 0;
 	}
 	
-	/* 组合键 K1K2 */
+	/* 组合键 部分 */
 	if (_id == HARD_KEY_NUM + 0)
 	{
+		/*
 		if (KeyPinActive(KID_K1) && KeyPinActive(KID_K2))
 		{
 			return 1;
@@ -141,11 +141,13 @@ static uint8_t IsKeyDownFunc(uint8_t _id)
 		{
 			return 0;
 		}
+		*/
 	}
 
-	/* 组合键 K2K3 */
+	/* 组合键 部分 */
 	if (_id == HARD_KEY_NUM + 1)
 	{
+		/*
 		if (KeyPinActive(KID_K2) && KeyPinActive(KID_K3))
 		{
 			return 1;
@@ -154,6 +156,7 @@ static uint8_t IsKeyDownFunc(uint8_t _id)
 		{
 			return 0;
 		}
+		*/
 	}
 
 	return 0;
@@ -232,9 +235,7 @@ static void bsp_InitKeyVar(void)
 	
 	/* 摇杆上下左右，支持长按1秒后，自动连发 */
 	bsp_SetKeyParam(KID_K1, 100, 6);
-	//bsp_SetKeyParam(KID_JOY_D, 100, 6);
-	//bsp_SetKeyParam(KID_JOY_L, 100, 6);
-	//bsp_SetKeyParam(KID_JOY_R, 100, 6);
+
 }
 
 /*
@@ -394,7 +395,7 @@ static void bsp_DetectKey(uint8_t i)
 					/* 发送按钮持续按下的消息 */
 					if (++pBtn->LongCount == pBtn->LongTime)
 					{
-						/* 键值放入按键FIFO */
+						/* ”长按“键值放入按键FIFO */
 						bsp_PutKey((uint8_t)(3 * i + 3));
 					}
 				}
@@ -405,7 +406,7 @@ static void bsp_DetectKey(uint8_t i)
 						if (++pBtn->RepeatCount >= pBtn->RepeatSpeed)
 						{
 							pBtn->RepeatCount = 0;
-							/* 常按键后，每隔10ms发送1个按键 */
+							/* 长按键后，每隔10ms发送1个按键，修改此次可以修改写入的值 */
 							bsp_PutKey((uint8_t)(3 * i + 1));
 						}
 					}

@@ -232,7 +232,7 @@ static void MX_USART3_UART_Init(void)
   }
   /* USER CODE BEGIN USART3_Init 2 */
 	
-	HAL_UART_Receive_IT(&huart3,(uint8_t	*)hal_Rx_Buffers,HAL_USART_REC_LEN);
+	//HAL_UART_Receive_IT(&huart3,(uint8_t	*)hal_Rx_Buffers,HAL_USART_REC_LEN);
   /* USER CODE END USART3_Init 2 */
 
 }
