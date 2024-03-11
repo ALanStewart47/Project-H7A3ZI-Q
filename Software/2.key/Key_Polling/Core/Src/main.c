@@ -105,13 +105,19 @@ int main(void)
 		s_KeyCode=bsp_GetKey();
 		if(s_KeyCode	!=	KEY_NONE)
 		{
+			
 			if(s_KeyCode	==	KEY_DOWN_K1)
 			{
-				printf("Key 2 down\r\n");
+				printf("Key 1 down\r\n");
 			}
+
 			if(s_KeyCode	==	KEY_1_UP)
 			{
-				printf("Key 2 up\r\n");
+				printf("Key 1 up\r\n");
+			}
+			if(s_KeyCode	==	KEY_1_LONG)
+			{
+				printf("Key 1 long\r\n");
 			}
 		}
 		

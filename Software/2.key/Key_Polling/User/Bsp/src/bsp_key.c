@@ -26,7 +26,7 @@
 #include "bsp_key.h"
 
 #define HARD_KEY_NUM	    1	   						/* 实体按键个数 */
-#define KEY_COUNT   	 	(HARD_KEY_NUM + 2)	/* 8个独立建 + 2个组合按键 */
+#define KEY_COUNT   	 	(HARD_KEY_NUM + 0)	/* 8个独立建 + 2个组合按键 */
 
 /* 使能GPIO时钟 */
 #define ALL_KEY_GPIO_CLK_ENABLE() {	\
@@ -48,13 +48,8 @@ typedef struct
 /* GPIO和PIN定义 */
 static const X_GPIO_T s_gpio_list[HARD_KEY_NUM] = {
 	//{GPIOI, GPIO_PIN_8, 0},		/* K1 */
-	{GPIOC, GPIO_PIN_13, 1},	/* K2 */
-	//{GPIOH, GPIO_PIN_4, 0},		/* K3 */
-	//{GPIOG, GPIO_PIN_2, 0},		/* JOY_U */	
-	//{GPIOB, GPIO_PIN_0, 0},		/* JOY_D */
-	//{GPIOG, GPIO_PIN_3, 0},		/* JOY_L */	
-	//{GPIOG, GPIO_PIN_7, 0},		/* JOY_R */	
-	//{GPIOI, GPIO_PIN_11, 0},	/* JOY_OK */
+	{GPIOC, GPIO_PIN_13, 1},	/* K */
+
 };	
 
 /* 定义一个宏函数简化后续代码 
@@ -236,10 +231,10 @@ static void bsp_InitKeyVar(void)
 	/* 如果需要单独更改某个按键的参数，可以在此单独重新赋值 */
 	
 	/* 摇杆上下左右，支持长按1秒后，自动连发 */
-	bsp_SetKeyParam(KID_JOY_U, 100, 6);
-	bsp_SetKeyParam(KID_JOY_D, 100, 6);
-	bsp_SetKeyParam(KID_JOY_L, 100, 6);
-	bsp_SetKeyParam(KID_JOY_R, 100, 6);
+	bsp_SetKeyParam(KID_K1, 100, 6);
+	//bsp_SetKeyParam(KID_JOY_D, 100, 6);
+	//bsp_SetKeyParam(KID_JOY_L, 100, 6);
+	//bsp_SetKeyParam(KID_JOY_R, 100, 6);
 }
 
 /*
