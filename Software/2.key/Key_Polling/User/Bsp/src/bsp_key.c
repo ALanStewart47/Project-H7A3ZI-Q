@@ -3,7 +3,7 @@
 *
 *	模块名称 : 独立按键驱动模块 (外部输入IO)
 *	文件名称 : bsp_key.c
-*	版    本 : V1.3
+*	版    本 : V1.4
 *	说    明 : 扫描独立按键，具有软件滤波机制，具有按键FIFO。可以检测如下事件：
 *				(1) 按键按下
 *				(2) 按键弹起
@@ -11,13 +11,14 @@
 *				(4) 长按时自动连发
 *
 *	修改记录 :
-*		版本号  日期        作者     说明
-*		V1.0    2013-02-01 armfly  正式发布
-*		V1.1    2013-06-29 armfly  增加1个读指针，用于bsp_Idle() 函数读取系统控制组合键（截屏）
-*								   增加 K1 K2 组合键 和 K2 K3 组合键，用于系统控制
-*		V1.2	2016-01-25 armfly  针对P02工控板更改. 调整gpio定义方式，更加简洁
-*		V1.3	2018-11-26 armfly  s_tBtn结构赋初值0
-*
+*		版本号  日期       		 作者     说明
+*		V1.0    2013-02-01 		armfly  			正式发布
+*		V1.1    2013-06-29 		armfly  			增加1个读指针，用于bsp_Idle() 函数读取系统控制组合键（截屏）
+*								   												增加 K1 K2 组合键 和 K2 K3 组合键，用于系统控制
+*		V1.2		2016-01-25 		armfly  			针对P02工控板更改. 调整gpio定义方式，更加简洁
+*		V1.3		2018-11-26 		armfly  			s_tBtn结构赋初值0
+*		V1.4		2024-03-27		ALanStewart		移除对原bsp文件的依赖，适配STM32HAL库
+																				与NUCLEO-H7A3ZI-Q开发板（基于Keil.STM32H7xx_DFP.3.1.0）
 *	Copyright (C), 2016-2020, 安富莱电子 www.armfly.com
 *
 *********************************************************************************************************
@@ -25,8 +26,8 @@
 
 #include "bsp_key.h"
 
-#define HARD_KEY_NUM	    1	   						/* 实体按键个数 */
-#define KEY_COUNT   	 	(HARD_KEY_NUM + 0)	/* 8个独立建 + 2个组合按键 */
+#define HARD_KEY_NUM	    1	   							/* 实体按键个数（根据自己的项目实际来） */	
+#define KEY_COUNT   	 	(HARD_KEY_NUM + 0)	/* 1个独立建 + 0个组合按键 */
 
 /* 使能GPIO时钟 */
 #define ALL_KEY_GPIO_CLK_ENABLE() {	\
@@ -47,8 +48,7 @@ typedef struct
 
 /* GPIO和PIN定义 */
 static const X_GPIO_T s_gpio_list[HARD_KEY_NUM] = {
-	{GPIOC, GPIO_PIN_13, 1},	/* K1 */
-
+	{GPIOC, GPIO_PIN_13, 1},	/* K1 -- PC13 , 激活电平为1（高电平）*/
 };	
 
 /* 定义一个宏函数简化后续代码 
@@ -233,7 +233,7 @@ static void bsp_InitKeyVar(void)
 
 	/* 如果需要单独更改某个按键的参数，可以在此单独重新赋值 */
 	
-	/* 摇杆上下左右，支持长按1秒后，自动连发 */
+	/* 长按1秒后，自动连发（即一直检查到按下事件） */
 	bsp_SetKeyParam(KID_K1, 100, 6);
 
 }

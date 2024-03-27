@@ -92,7 +92,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
-	bsp_InitKey();
+	bsp_InitKey();		//°´¼üBSP³õÊ¼»¯
   /* USER CODE END 2 */
 	printf("Init Success!\r\n");
   /* Infinite loop */
