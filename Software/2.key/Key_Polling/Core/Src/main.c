@@ -94,7 +94,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	bsp_InitKey();		//°´¼üBSP³õÊ¼»¯
   /* USER CODE END 2 */
-	printf("Init Success!\r\n");
+	printf("bsp_Key Init Success!\r\n");
+	printf("STM32H7xx_CMSIS_DEVICE_VERSION : %d.%d.%d.%d\r\n",
+						__STM32H7xx_CMSIS_DEVICE_VERSION_MAIN,
+						__STM32H7xx_CMSIS_DEVICE_VERSION_SUB1,
+						__STM32H7xx_CMSIS_DEVICE_VERSION_SUB2,
+						__STM32H7xx_CMSIS_DEVICE_VERSION_RC);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
