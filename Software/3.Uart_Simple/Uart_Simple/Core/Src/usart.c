@@ -21,14 +21,14 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-uint8_t		USART_RX_BUF[USART_REC_LEN];			//ÓÃ»§ÒªÊ¹ÓÃµÄ½ÓÊÕÊı×é
+uint8_t		USART_RX_BUF[USART_REC_LEN];			//ï¿½Ã»ï¿½ÒªÊ¹ï¿½ÃµÄ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 /*-------------------------
--BIT15,½ÓÊÜÍê³É±êÖ¾
--BIT14,½ÓÊÜµ½0x0d
--BIT13-0,½ÓÊÜµ½µÄ×Ö½ÚµÄÊıÁ¿
+-BIT15,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É±ï¿½Ö¾
+-BIT14,ï¿½ï¿½ï¿½Üµï¿½0x0d
+-BIT13-0,ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½ï¿½Ö½Úµï¿½ï¿½ï¿½ï¿½ï¿½
 -------------------------*/
 uint16_t	USART_RX_STA	= 0;
-uint8_t		hal_Rx_Buffers[HAL_USART_REC_LEN];			//HAL¿â½ÓÊÜº¯ÊıÒªÓÃµÄbuff
+uint8_t		hal_Rx_Buffers[HAL_USART_REC_LEN];			//HALï¿½ï¿½ï¿½ï¿½Üºï¿½ï¿½ï¿½Òªï¿½Ãµï¿½buff
 
 /* USER CODE END 0 */
 
@@ -74,7 +74,7 @@ void MX_USART3_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART3_Init 2 */
-	HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers,HAL_USART_REC_LEN);		//ÖĞ¶Ï½ÓÊÕº¯Êı
+	HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers,HAL_USART_REC_LEN);		//ï¿½Ğ¶Ï½ï¿½ï¿½Õºï¿½ï¿½ï¿½
   /* USER CODE END USART3_Init 2 */
 
 }
@@ -151,23 +151,23 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 /* USER CODE BEGIN 1 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance==USART3)//Èç¹ûÊÇ´®¿Ú1
+	if(huart->Instance==USART3)//ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½1
 	{
-		if((USART_RX_STA&0x8000)==0)//½ÓÊÕÎ´Íê³É
+		if((USART_RX_STA&0x8000)==0)//ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½
 		{
-			if(USART_RX_STA&0x4000)//½ÓÊÕµ½ÁË0x0d
+			if(USART_RX_STA&0x4000)//ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½0x0d
 			{
-				if(hal_Rx_Buffers[0]!=0x0a)USART_RX_STA=0;//½ÓÊÕ´íÎó,ÖØĞÂ¿ªÊ¼
-				else USART_RX_STA|=0x8000;	//½ÓÊÕÍê³ÉÁË 
+				if(hal_Rx_Buffers[0]!=0x0a)USART_RX_STA=0;//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Â¿ï¿½Ê¼
+				else USART_RX_STA|=0x8000;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
 			}
-			else //»¹Ã»ÊÕµ½0X0D
+			else //ï¿½ï¿½Ã»ï¿½Õµï¿½0X0D
 			{	
 				if(hal_Rx_Buffers[0]==0x0d)USART_RX_STA|=0x4000;
 				else
 				{
 					USART_RX_BUF[USART_RX_STA&0X3FFF]=hal_Rx_Buffers[0] ;
 					USART_RX_STA++;
-					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;//½ÓÊÕÊı¾İ´íÎó,ÖØĞÂ¿ªÊ¼½ÓÊÕ	  
+					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Â¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½	  
 				}		 
 			}
 		}
@@ -175,10 +175,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 }
 
-//ÖØ¶¨Òåfputcº¯Êı 
+//ï¿½Ø¶ï¿½ï¿½ï¿½fputcï¿½ï¿½ï¿½ï¿½ 
 int fputc(int ch, FILE *f)
 { 	
-	while((USART3->ISR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï   
+	while((USART3->ISR&0X40)==0);//Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½   
 	USART3->TDR=(uint8_t)ch;     
 	return ch;
 }

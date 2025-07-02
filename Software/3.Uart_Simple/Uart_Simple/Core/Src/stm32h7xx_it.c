@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
-#include "usart.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -210,16 +210,16 @@ void USART3_IRQHandler(void)
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
 	timeout=0;
-    while (HAL_UART_GetState(&huart3)!=HAL_UART_STATE_READY)//µÈ´ý¾ÍÐ÷
+    while (HAL_UART_GetState(&huart3)!=HAL_UART_STATE_READY)//ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½
 	{
-        timeout++;////³¬Ê±´¦Àí
+        timeout++;////ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
         if(timeout>maxDelay) break;		
 	}
      
 	timeout=0;
-	while(HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers, HAL_USART_REC_LEN)!=HAL_OK)//Ò»´Î´¦ÀíÍê³ÉÖ®ºó£¬ÖØÐÂ¿ªÆôÖÐ¶Ï²¢ÉèÖÃRxXferCountÎª1
+	while(HAL_UART_Receive_IT(&huart3,(uint8_t *)hal_Rx_Buffers, HAL_USART_REC_LEN)!=HAL_OK)//Ò»ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½Ð¶Ï²ï¿½ï¿½ï¿½ï¿½ï¿½RxXferCountÎª1
 	{
-        timeout++; //³¬Ê±´¦Àí
+        timeout++; //ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
         if(timeout>maxDelay) break;	
 	}
   /* USER CODE END USART3_IRQn 1 */

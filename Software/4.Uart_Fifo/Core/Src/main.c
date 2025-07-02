@@ -18,12 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
-#include "bsp_uart_fifo.h"
-
-#define EXAMPLE_NAME	"uart_fifo"
-#define EXAMPLE_DATE	"2024-01-19"
-#define DEMO_VER		"1.0"
+#include "usart.h"
+#include "usb_otg.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -47,18 +44,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-UART_HandleTypeDef huart3;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_USART3_UART_Init(void);
-static void MX_USB_OTG_HS_USB_Init(void);
-static void PrintfLogo(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -77,10 +68,10 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	uint8_t read;
 	
-	const char buf1[] = "½ÓÊÕµ½´®¿ÚÃüÁî1\r\n";
-	const char buf2[] = "½ÓÊÕµ½´®¿ÚÃüÁî2\r\n";
-	const char buf3[] = "½ÓÊÕµ½´®¿ÚÃüÁî3\r\n";
-	const char buf4[] = "½ÓÊÕµ½´®¿ÚÃüÁî4\r\n";
+	const char buf1[] = "ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1\r\n";
+	const char buf2[] = "ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2\r\n";
+	const char buf3[] = "ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3\r\n";
+	const char buf4[] = "ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4\r\n";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -101,7 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_USART3_UART_Init();
+  MX_USART3_UART_Init();
   MX_USB_OTG_HS_USB_Init();
   /* USER CODE BEGIN 2 */
 
@@ -114,31 +105,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		if (comGetChar(COM3, &read))
-		{
-			switch (read)
-			{
-				case '1':
-					comSendBuf(COM3, (uint8_t *)buf1, strlen(buf1));
-					break;
 
-				case '2':
-					comSendBuf(COM3, (uint8_t *)buf2, strlen(buf2));
-					break;
-
-				case '3':
-					comSendBuf(COM3, (uint8_t *)buf3, strlen(buf3));
-					break;
-
-				case '4':
-					comSendBuf(COM3, (uint8_t *)buf4, strlen(buf4));
-					break;	
-				
-				default:
-					break;
-			}
-		}
-		
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -206,169 +173,12 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief USART3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART3_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART3_Init 0 */
-
-  /* USER CODE END USART3_Init 0 */
-
-  /* USER CODE BEGIN USART3_Init 1 */
-
-  /* USER CODE END USART3_Init 1 */
-  huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
-  huart3.Init.WordLength = UART_WORDLENGTH_8B;
-  huart3.Init.StopBits = UART_STOPBITS_1;
-  huart3.Init.Parity = UART_PARITY_NONE;
-  huart3.Init.Mode = UART_MODE_TX_RX;
-  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart3.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&huart3, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&huart3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART3_Init 2 */
-
-  /* USER CODE END USART3_Init 2 */
-
-}
-
-/**
-  * @brief USB_OTG_HS Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USB_OTG_HS_USB_Init(void)
-{
-
-  /* USER CODE BEGIN USB_OTG_HS_Init 0 */
-
-  /* USER CODE END USB_OTG_HS_Init 0 */
-
-  /* USER CODE BEGIN USB_OTG_HS_Init 1 */
-
-  /* USER CODE END USB_OTG_HS_Init 1 */
-  /* USER CODE BEGIN USB_OTG_HS_Init 2 */
-
-  /* USER CODE END USB_OTG_HS_Init 2 */
-
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(USB_FS_PWR_EN_GPIO_Port, USB_FS_PWR_EN_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_FS_PWR_EN_Pin */
-  GPIO_InitStruct.Pin = USB_FS_PWR_EN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(USB_FS_PWR_EN_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LD1_Pin LD3_Pin */
-  GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_FS_OVCR_Pin */
-  GPIO_InitStruct.Pin = USB_FS_OVCR_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_FS_OVCR_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_FS_VBUS_Pin */
-  GPIO_InitStruct.Pin = USB_FS_VBUS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_FS_VBUS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_FS_ID_Pin */
-  GPIO_InitStruct.Pin = USB_FS_ID_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
-  HAL_GPIO_Init(USB_FS_ID_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : USB_FS_N_Pin USB_FS_P_Pin */
-  GPIO_InitStruct.Pin = USB_FS_N_Pin|USB_FS_P_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
-
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
-}
-
 /* USER CODE BEGIN 4 */
 static void PrintfLogo(void)
 {
 	printf("*************************************************************\n\r");
 	
-	/* ¼ì²âCPU ID */
+	/* ï¿½ï¿½ï¿½CPU ID */
 	{
 		uint32_t CPU_Sn0, CPU_Sn1, CPU_Sn2;;
 		
@@ -377,7 +187,7 @@ static void PrintfLogo(void)
 		CPU_Sn2 = *(__IO uint32_t*)(0x08FFF800 + 8);
 		
 
-		printf("\r\nCPU : STM32H7A3ZI-Q , Ö÷Æµ: %dMHz\r\n", SystemCoreClock / 1000000);
+		printf("\r\nCPU : STM32H7A3ZI-Q , ï¿½ï¿½Æµ: %dMHz\r\n", SystemCoreClock / 1000000);
 		printf("UID = %08X %08X %08X\n\r", CPU_Sn2, CPU_Sn1, CPU_Sn0);
 	}
 
@@ -395,14 +205,14 @@ static void PrintfLogo(void)
 	
 	printf("\n\r");
 	printf("*************************************************************\n\r");
-	printf("* Àý³ÌÃû³Æ   : %s\r\n", EXAMPLE_NAME);	/* ´òÓ¡Àý³ÌÃû³Æ */
-	printf("* Àý³Ì°æ±¾   : %s\r\n", DEMO_VER);		/* ´òÓ¡Àý³Ì°æ±¾ */
-	printf("* ·¢²¼ÈÕÆÚ   : %s\r\n", EXAMPLE_DATE);	/* ´òÓ¡Àý³ÌÈÕÆÚ */
+	printf("* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½   : %s\r\n", EXAMPLE_NAME);	/* ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+	printf("* ï¿½ï¿½ï¿½Ì°æ±¾   : %s\r\n", DEMO_VER);		/* ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½Ì°æ±¾ */
+	printf("* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½   : %s\r\n", EXAMPLE_DATE);	/* ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 
-	/* ´òÓ¡STµÄHAL¿â°æ±¾ */
-	printf("* HAL¿â°æ±¾  : %d.%d.%d.%d (STM32H7xx HAL Driver)\r\n", MAIN_HalVersion,SUB1_HalVersion,SUB2_HalVersion,RC_HalVersion);
-	printf("* \r\n");	/* ´òÓ¡Ò»ÐÐ¿Õ¸ñ */
-	printf("* Copyright www.armfly.com °²¸»À³µç×Ó\r\n");
+	/* ï¿½ï¿½Ó¡STï¿½ï¿½HALï¿½ï¿½æ±¾ */
+	printf("* HALï¿½ï¿½æ±¾  : %d.%d.%d.%d (STM32H7xx HAL Driver)\r\n", MAIN_HalVersion,SUB1_HalVersion,SUB2_HalVersion,RC_HalVersion);
+	printf("* \r\n");	/* ï¿½ï¿½Ó¡Ò»ï¿½Ð¿Õ¸ï¿½ */
+	printf("* Copyright www.armfly.com ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\r\n");
 	printf("*************************************************************\n\r");
 }
 /* USER CODE END 4 */
@@ -421,8 +231,6 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-
 
 #ifdef  USE_FULL_ASSERT
 /**

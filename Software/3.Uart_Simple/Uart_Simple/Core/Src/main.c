@@ -99,25 +99,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		if(USART_RX_STA&0x8000)
-		{					   
-			len=USART_RX_STA&0x3fff;//得到此次接收到的数据长度
-			printf("\r\n您发送的消息为:\r\n");
-			HAL_UART_Transmit(&huart3,(uint8_t*)USART_RX_BUF,len,1000);	//发送接收到的数据
-			while(__HAL_UART_GET_FLAG(&huart3,UART_FLAG_TC)!=SET);		//等待发送结束
-			printf("\r\n\r\n");//插入换行
-			USART_RX_STA=0;
-		}else
-		{
-			times++;
-			if(times%5000==0)
-			{
-				printf("\r\nALIENTEK STM32H7开发板 串口实验\r\n");
-				printf("正点原子@ALIENTEK\r\n\r\n\r\n");
-			}
-			if(times%200==0)printf("请输入数据,以回车键结束\r\n"); 
-			HAL_Delay(50);	//delay 50ms
-		}
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
